@@ -14,7 +14,7 @@ function App() {
           <Link to="/posts">posts</Link>
         </li>
         <li>
-          <Link to="/posts/:id">posts Detail</Link>
+          <Link to="/posts/:id">Posts Detail</Link>
         </li>
         <li>
           <Link to="/posts/new">posts New</Link>
