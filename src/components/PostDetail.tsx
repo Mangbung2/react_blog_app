@@ -1,40 +1,61 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { PostProps } from "./PostList";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "firebaseApp";
+import Loader from "./Loader";
 
 export default function PostDetail() {
+  const [post, setPost] = useState<PostProps | null>(null);
+  const params = useParams();
+
+  const getPost = async (id: string) => {
+    if (id) {
+      const docRef = doc(db, "posts", id);
+      const docSnap = await getDoc(docRef);
+
+      setPost({ id: docSnap?.id, ...(docSnap.data() as PostProps) });
+    }
+  };
+
+  const handleDelete = () => {
+    console.log("delete!");
+  };
+
+  useEffect(() => {
+    if (params?.id) getPost(params?.id);
+  }, []);
+
   return (
     <>
       <div className="post__detail">
-        <div className="post__box">
-          <div className="post__title">
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry.
-          </div>
-          <div className="post__profile-box">
-            <div className="post__profile" />
-            <div className="post__author-name">김현우</div>
-            <div className="post__date">2023.11.30</div>
-          </div>
-          <div className="post__utils-box">
-            <div className="post__delete">삭제</div>
-            <div className="post__edit">
-              <Link to={`/posts/edit/1`}>수정</Link>
+        {post ? (
+          <div className="post__box">
+            <div className="post__title">{post?.title}</div>
+            <div className="post__profile-box">
+              <div className="post__profile" />
+              <div className="post__author-name">{post?.email}</div>
+              <div className="post__date">{post?.createdAt}</div>
+            </div>
+            <div className="post__utils-box">
+              <div
+                className="post__delete"
+                role="presentation"
+                onClick={handleDelete}
+              >
+                삭제
+              </div>
+              <div className="post__edit">
+                <Link to={`/posts/edit/${post?.id}`}>수정</Link>
+              </div>
+            </div>
+            <div className="post__text post__text--pre-wrap">
+              {post?.content}
             </div>
           </div>
-          <div className="post__text">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            semper ultrices justo, a scelerisque elit pulvinar ut. Curabitur ac
-            lorem eu mauris gravida facilisis nec blandit lorem. Mauris vitae
-            quam mollis, efficitur tortor vitae, blandit mauris. Donec
-            ullamcorper nulla ipsum, in ullamcorper eros aliquet at. Morbi
-            condimentum sed lorem in aliquet. Nulla egestas convallis diam.
-            Donec magna justo, congue id ex nec, sodales porta nisi.
-            Pellentesque viverra ante ut est dictum, ut dapibus nisl ornare.
-            Phasellus non neque porttitor, ultrices nisl sed, luctus nunc. Nunc
-            tincidunt nec nulla sit amet iaculis. Nulla dapibus enim leo, in
-            aliquam purus mattis vitae. Sed a velit luctus, placerat arcu in,
-            egestas quam. In venenatis sodales ex id ultricies.
-          </div>
-        </div>
+        ) : (
+          <Loader />
+        )}
       </div>
     </>
   );
